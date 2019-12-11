@@ -1,0 +1,116 @@
+#!/bin/bash
+LAUNCHER_VERSION=1.5
+image_name=funtoolinux/steam-nvidia-ubuntu18:$LAUNCHER_VERSION
+required_services="docker nvidia-container"
+for service in $required_services; do
+	if [ ! -e /etc/init.d/$service ]; then
+		echo "Required service $service must be installed. Exiting."
+		exit 1
+	fi
+	if ! /etc/init.d/$service status >/dev/null 2>&1; then
+		echo "Service $service is not running. Please start first."
+		exit 1
+	fi
+done
+install -d ${HOME}/SteamData
+container_name=steam-nvidia-${USER}
+if [ "$1" = "" ] || [ "$1" == "start" ]; then 
+	echo " * Funtoo Steam NVIDIA Launcher $LAUNCHER_VERSION"
+	echo
+	echo " * Allowing local connections to your X session."
+	xhost +local: >/dev/null 2>&1
+	docker inspect $container_name >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		exists=1
+	else
+		exists=0
+	fi
+	if [ $exists -eq 0 ]; then
+		echo " * Container does not exist... creating and starting..."
+		echo " * Here we go! Press ^C when you're done gaming to stop steam."
+		echo " * Steam begins..."
+		echo; echo
+		# create and start:
+		nvidia-docker run \
+			-ti \
+			--privileged \
+			--name steam-nvidia-${USER} \
+			-e DISPLAY=$DISPLAY \
+			-e PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native \
+			-e STEAM_UID=$UID \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-v /dev/shm:/dev/shm \
+			-v ${XDG_RUNTIME_DIR}/pulse:${XDG_RUNTIME_DIR}/pulse \
+			-v ${HOME}/SteamData:/home/steam \
+			$image_name \
+			/root/steam.sh
+	else
+		echo " * Found container..."
+		existing_image_name="$(docker inspect -f '{{.Config.Image}}' $container_name)"
+		running="$(docker inspect -f '{{.State.Running}}' $container_name)"
+		if [ "$existing_image_name" != "$image_name" ]; then
+			cat << EOF
+
+CONTAINER UPDATE REQUIRED!
+==========================
+
+ This version of the Funtoo Steam NVIDIA Launcher is designed to work with the
+ following version of the docker container:
+
+  $image_name
+
+ However, the following version of the container currently exists:
+
+  $existing_image_name
+
+ Currently, it's necessary to wipe your old container and then this launcher
+ will create a new updated container. This *will* wipe all your games and they
+ will need to be re-downloaded. :( Drobbins is working on fixing this issue in
+ future versions of the launcher -- thanks for your patience!
+
+ To wipe the container, run the following commands:
+
+  $ docker stop $container_name
+  $ docker rm $container_name
+
+Then re-run this script and a new container will be created.
+EOF
+			exit 1
+		fi
+		if [ "$running" == "false" ]; then
+			echo " * Starting container..."
+			nvidia-docker start $container_name > /dev/null 2>&1
+			sleep 3
+		fi
+		echo " * Here we go! Press ^C when you're done gaming to stop steam."
+		echo
+		echo " * There may be up to a 10-second delay while Steam starts and"
+		echo "   authenticates your account."
+		echo
+		echo " * Steam begins..."
+		echo; echo
+		nvidia-docker exec \
+			-ti \
+			--privileged \
+			-e DISPLAY=$DISPLAY \
+			-e PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native \
+			 $container_name \
+			 /root/steam.sh
+	fi
+	echo
+	echo " * Steam command complete; stopping container..."
+	nvidia-docker stop $container_name >/dev/null 2>&1
+	echo " * Done."
+elif [ "$1" == "attach" ]; then
+		nvidia-docker exec \
+			-ti \
+			--privileged \
+			-e DISPLAY=$DISPLAY \
+			-e PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native \
+			 $container_name \
+			/bin/bash
+elif [ "$1" == "stop" ]; then
+	echo " * Stopping container..."
+	nvidia-docker stop $container_name >/dev/null 2>&1
+fi
+echo
