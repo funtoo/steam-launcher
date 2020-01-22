@@ -7,6 +7,16 @@ See https://www.funtoo.org/Steam for usage instructions.
 
 ## Release Notes
 
+### 1.5
+
+Release 1.5 contains a new Docker container image. If upgrading from 1.4, you will *not* need to re-download your games
+or reinstall Steam. It will use your existing ~/SteamData directory.
+
+Changes:
+
+* Disable zenity (the gtk+ dialog pop-up) to avoid annoying pop-ups when Steam first launches.
+* FL-6907: fix hard-coding of pulseaudio config for UID 1000 so it will work with all host user UIDs.
+
 ### 1.4
 
 Release 1.4 contains a new Docker container image. To use this launcher, the steam launcher will download and create a new
