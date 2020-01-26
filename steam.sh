@@ -22,7 +22,7 @@ ln -s /bin/true /usr/bin/zenity
 install -d /etc/pulse
 cat > /etc/pulse/client.conf << EOF
 # Connect to the host's server using the mounted UNIX socket
-default-server = unix:${PULSE_SERVER}
+default-server = ${PULSE_SERVER}
 
 # Prevent a server running in the container
 autospawn = no

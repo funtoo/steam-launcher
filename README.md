@@ -7,6 +7,14 @@ See https://www.funtoo.org/Steam for usage instructions.
 
 ## Release Notes
 
+### 1.6
+
+Release 1.6 contains a new Docker container image, but will utilize your already-installed games without needing to
+redownload.
+
+Changes:
+* FL-6947: fix PulseAudio (audio) so it works again inside Steam.
+
 ### 1.5
 
 Release 1.5 contains a new Docker container image. If upgrading from 1.4, you will *not* need to re-download your games
