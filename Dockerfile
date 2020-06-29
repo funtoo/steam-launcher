@@ -9,7 +9,7 @@ RUN apt-get install -y kmod locales
 RUN locale-gen en_US.UTF-8
 RUN add-apt-repository multiverse
 RUN add-apt-repository ppa:graphics-drivers/ppa
-RUN apt-get install -y -q nvidia-driver-430
+RUN apt-get install -y -q nvidia-driver-440
 RUN apt-get install -y steam
 RUN apt-get install -y pulseaudio-utils
 RUN apt-get install -y libnm-glib4:i386 libnm-util2:i386 pciutils psmisc
