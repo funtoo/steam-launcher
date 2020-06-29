@@ -1,6 +1,6 @@
 #!/bin/bash
-LAUNCHER_VERSION=1.6
-image_name=funtoolinux/steam-nvidia-ubuntu18:$LAUNCHER_VERSION
+LAUNCHER_VERSION=1.7.1
+image_name=adioskid/steam-nvidia-ubuntu18:$LAUNCHER_VERSION
 required_services="docker nvidia-container"
 for service in $required_services; do
 	if [ ! -e /etc/init.d/$service ]; then
