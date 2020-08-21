@@ -1,5 +1,5 @@
 #!/bin/bash
-LAUNCHER_VERSION=1.7
+LAUNCHER_VERSION=1.8
 image_name=funtoo/steam-nvidia-ubuntu18:$LAUNCHER_VERSION
 required_services="docker nvidia-container"
 for service in $required_services; do
